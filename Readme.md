@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Андрей Федосеев](https://up.htmlacademy.ru/javascript/19/user/1287457).
-* Наставник: `Неизвестно`.
+* Наставник: `Егор Дьяченко`.
 
 ---
 
