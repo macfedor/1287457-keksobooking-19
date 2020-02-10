@@ -72,11 +72,43 @@
     } else {
       window.util.hideElem(result.querySelector('.popup__avatar'));
     }
+
+    var onClose = function () {
+      result.classList.add('hidden');
+    };
+
+    var closeBtn = result.querySelector('.popup__close');
+    closeBtn.addEventListener('click', onClose);
+
     return result;
   };
 
+  var onDocumentEscPress = function (evt) {
+    if (evt.key === window.util.keyEscape) {
+      var activeCard = document.querySelector('.map__card.active');
+      activeCard.classList.remove('active');
+      activeCard.classList.add('hidden');
+      document.removeEventListener('keydown', onDocumentEscPress);
+    }
+  };
+
+  var showCard = function (title) {
+    var popups = document.querySelectorAll('.map__card');
+    for (var i = 0; i < popups.length; i++) {
+      if (popups[i].querySelector('.popup__title').textContent === title) {
+        popups[i].classList.remove('hidden');
+        popups[i].classList.add('active');
+      } else {
+        popups[i].classList.add('hidden');
+        popups[i].classList.remove('active');
+      }
+    }
+    document.addEventListener('keydown', onDocumentEscPress);
+  };
+
   window.card = {
-    addCard: addCard
+    addCard: addCard,
+    showCard: showCard
   };
 
 })();
