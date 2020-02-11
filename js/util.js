@@ -4,6 +4,7 @@
 
   var MOUSE_LEFT = 0;
   var KEY_ENTER = 'Enter';
+  var KEY_ESC = 'Escape';
 
   var getRandomNumb = function (min, max) {
     return Math.floor(Math.random() * max) + min;
@@ -51,6 +52,7 @@
     hideElem: hideElem,
     mouseLeft: MOUSE_LEFT,
     keyEnter: KEY_ENTER,
+    keyEscape: KEY_ESC,
     createInfo: createInfo
   };
 

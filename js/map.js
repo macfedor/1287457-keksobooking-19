@@ -10,6 +10,12 @@
   var noticeForm = document.querySelector('.ad-form');
   var addressInput = noticeForm.querySelector('#address');
 
+  var onClickPin = function (evt) {
+    var pin = evt.target.closest('button');
+    var img = pin.querySelector('img');
+    window.card.showCard(img.alt);
+  };
+
   var addPin = function (pin, template) {
     var result = template.cloneNode(true);
     var coordX = pin.location.x - result.offsetWidth / 2;
@@ -18,6 +24,12 @@
     avatar.setAttribute('alt', pin.offer.title);
     avatar.setAttribute('src', pin.author.avatar);
     result.setAttribute('style', 'left: ' + coordX + 'px; top: ' + coordY + 'px;');
+    result.addEventListener('mousedown', onClickPin);
+    result.addEventListener('keydown', function (evt) {
+      if (evt.key === window.util.keyEnter) {
+        onClickPin(evt);
+      }
+    });
     return result;
   };
 
@@ -25,13 +37,11 @@
     var fragmentPin = document.createDocumentFragment();
     var templatePin = document.querySelector('#pin').content.querySelector('button');
     var fragmentCard = document.createDocumentFragment();
-    // var templateCard = document.querySelector('#card').content.querySelector('.map__card');
+    var templateCard = document.querySelector('#card').content.querySelector('.map__card');
     for (var i = 0; i < array.length; i++) {
       if (array[i].offer) {
         fragmentPin.appendChild(addPin(array[i], templatePin));
-        if (i === 0) {
-          // fragmentCard.appendChild(addCard(array[i], templateCard));
-        }
+        fragmentCard.appendChild(window.card.addCard(array[i], templateCard));
       }
     }
     document.querySelector('.map__pins').appendChild(fragmentPin);
@@ -59,6 +69,7 @@
     window.backend.load(addData, window.util.createInfo);
     getEnabledPinCoords();
     window.notice.checkRoomsCapacities();
+    window.notice.checkTypesPrices();
   };
 
   var preparePage = function () {
