@@ -7,7 +7,6 @@
   var mainPinWidth = mainPin.offsetWidth;
   var mainPinHeight = mainPinImg.offsetHeight + Number(getComputedStyle(mainPin, 'after').height.replace('px', ''));
   var map = document.querySelector('.map');
-  var data = window.testData();
   var noticeForm = document.querySelector('.ad-form');
   var addressInput = noticeForm.querySelector('#address');
 
@@ -40,8 +39,10 @@
     var fragmentCard = document.createDocumentFragment();
     var templateCard = document.querySelector('#card').content.querySelector('.map__card');
     for (var i = 0; i < array.length; i++) {
-      fragmentPin.appendChild(addPin(array[i], templatePin));
-      fragmentCard.appendChild(window.card.addCard(array[i], templateCard));
+      if (array[i].offer) {
+        fragmentPin.appendChild(addPin(array[i], templatePin));
+        fragmentCard.appendChild(window.card.addCard(array[i], templateCard));
+      }
     }
     document.querySelector('.map__pins').appendChild(fragmentPin);
     var referenceElement = document.querySelector('.map__filters-container');
@@ -65,7 +66,7 @@
     window.filter.enableFilters();
     map.classList.remove('map--faded');
     noticeForm.classList.remove('ad-form--disabled');
-    addData(data);
+    window.backend.load(addData, window.util.createInfo);
     getEnabledPinCoords();
     window.notice.checkRoomsCapacities();
     window.notice.checkTypesPrices();
