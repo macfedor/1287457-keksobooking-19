@@ -95,12 +95,13 @@
   var showCard = function (title) {
     var popups = document.querySelectorAll('.map__card');
     for (var i = 0; i < popups.length; i++) {
-      if (popups[i].querySelector('.popup__title').textContent === title) {
-        popups[i].classList.remove('hidden');
-        popups[i].classList.add('active');
+      var elem = popups[i];
+      if (elem.querySelector('.popup__title').textContent === title) {
+        elem.classList.remove('hidden');
+        elem.classList.add('active');
       } else {
-        popups[i].classList.add('hidden');
-        popups[i].classList.remove('active');
+        elem.classList.add('hidden');
+        elem.classList.remove('active');
       }
     }
     document.addEventListener('keydown', onDocumentEscPress);

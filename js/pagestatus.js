@@ -62,60 +62,33 @@
   var getDefaultPosition = function () {
     var coordX = Math.floor(mainPin.offsetLeft - mainPin.offsetWidth / 2);
     var coordY = Math.floor(mainPin.offsetTop - mainPin.offsetHeight / 2);
-    addressInput.value = coordX + ', ' + coordY;
+    return coordX + ', ' + coordY;
   };
 
-  var activatePage = function (mode) {
+  var activatePage = function () {
     window.util.setAbleFormElems(noticeForm, true);
     window.filter.enableFilters();
     map.classList.remove('map--faded');
     noticeForm.classList.remove('ad-form--disabled');
+    window.backend.load(addData, window.util.onBackendError);
     getEnabledPinCoords();
+    window.notice.checkRoomsCapacities();
+    window.notice.checkTypesPrices();
 
     mainPin.removeEventListener('mousedown', onClickInactiveMainPin);
     mainPin.addEventListener('mousedown', onClickActiveMainPin);
-    if (mode === window.util.afterSendModeName) { // если мы уже загружали точки, то сейчас просто убираем у них класс hidden
-      var pins = map.querySelectorAll('.map__pin');
-      for (var i = 0; i < pins.length; i++) {
-        pins[i].classList.remove('hidden');
-      }
-    } else {
-      window.backend.load(addData, window.util.onBackendError);
-    }
   };
 
-  var preparePage = function (mode) {
+  var preparePage = function () {
     window.util.setAbleFormElems(noticeForm);
     window.filter.disableFilters();
-    getDefaultPosition();
-    if (mode === window.util.afterSendModeName) { // если у нас уже получены все данные, то прячем карточки и метки
-      var activeCard = map.querySelector('.map__card.popup.active');
-      var pins = map.querySelectorAll('.map__pin');
-      for (var i = 0; i < pins.length; i++) {
-        var elem = pins[i];
-        if (!elem.classList.contains('map__pin--main')) {
-          elem.classList.add('hidden');
-        }
-      }
-      activeCard.classList.remove('active');
-      activeCard.classList.add('hidden');
-      mainPin.addEventListener('mousedown', onAnotherClickInactiveMainPin);
-    } else {
-      mainPin.addEventListener('mousedown', onClickInactiveMainPin);
-    }
+    addressInput.value = getDefaultPosition();
+    mainPin.addEventListener('mousedown', onClickInactiveMainPin);
   };
 
   var onClickInactiveMainPin = function (evt) {
     if (evt.button === window.util.mouseLeft) {
       activatePage();
-      mainPin.removeEventListener('mousedown', onClickInactiveMainPin);
-    }
-  };
-
-  var onAnotherClickInactiveMainPin = function (evt) {
-    if (evt.button === window.util.mouseLeft) {
-      activatePage(window.util.afterSendModeName);
-      mainPin.removeEventListener('mousedown', onAnotherClickInactiveMainPin);
     }
   };
 
@@ -168,11 +141,5 @@
   });
 
   preparePage();
-
-  window.map = {
-    activatePage: activatePage,
-    preparePage: preparePage,
-    getDefaultPosition: getDefaultPosition
-  };
 
 })();
