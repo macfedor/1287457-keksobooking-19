@@ -4,14 +4,22 @@
 
   var MAX_Y = 630;
   var MIN_Y = 130;
+  var MAX_PIN_COUNT = 5;
+  var ANY_OPTION_NAME = 'any';
   var mainPin = document.querySelector('.map__pin--main');
   var mainPinImg = mainPin.querySelector('img');
   var mainPinWidth = mainPin.offsetWidth;
   var mainPinHeight = mainPinImg.offsetHeight + Number(getComputedStyle(mainPin, 'after').height.replace('px', ''));
   var map = document.querySelector('.map');
   var noticeForm = document.querySelector('.ad-form');
+  var filterForm = document.querySelector('.map__filters');
+  var filterItems = filterForm.querySelectorAll('select, input');
+  var filterGlossary = {
+    'housing-type': 'type'
+  };
   var addressInput = noticeForm.querySelector('#address');
   var mapWidth = map.offsetWidth;
+  var backendData;
 
   var onClickPin = function (evt) {
     var pin = evt.target.closest('button');
@@ -36,21 +44,35 @@
     return result;
   };
 
+  var removeElems = function (selector, unlessClassName) { // удаляем все элементы по селектору. кроме элементов с классом в unlessClassName
+    var elems = map.querySelectorAll(selector);
+    elems.forEach(function (elem) {
+      if (!elem.classList.contains(unlessClassName)) {
+        elem.remove();
+      }
+    });
+  };
+
   var addData = function (array) {
     var fragmentPin = document.createDocumentFragment();
     var templatePin = document.querySelector('#pin').content.querySelector('button');
     var fragmentCard = document.createDocumentFragment();
     var templateCard = document.querySelector('#card').content.querySelector('.map__card');
-    for (var i = 0; i < array.length; i++) {
-      var elem = array[i];
+    array.forEach(function (elem) {
       if (elem.offer) {
         fragmentPin.appendChild(addPin(elem, templatePin));
         fragmentCard.appendChild(window.card.addCard(elem, templateCard));
       }
-    }
+    });
     document.querySelector('.map__pins').appendChild(fragmentPin);
     var referenceElement = document.querySelector('.map__filters-container');
     document.querySelector('.map').insertBefore(fragmentCard, referenceElement);
+    window.util.setAbleFormElems(filterForm, true);
+  };
+
+  var redrawMap = function (data) {
+    removeElems('.map__pin, .map__card.popup', 'map__pin--main');
+    addData(data);
   };
 
   var getEnabledPinCoords = function () {
@@ -67,43 +89,51 @@
 
   var activatePage = function (mode) {
     window.util.setAbleFormElems(noticeForm, true);
-    window.filter.enableFilters();
     map.classList.remove('map--faded');
     noticeForm.classList.remove('ad-form--disabled');
     getEnabledPinCoords();
 
     mainPin.removeEventListener('mousedown', onClickInactiveMainPin);
     mainPin.addEventListener('mousedown', onClickActiveMainPin);
-    if (mode === window.util.afterSendModeName) { // если мы уже загружали точки, то сейчас просто убираем у них класс hidden
-      var pins = map.querySelectorAll('.map__pin');
-      for (var i = 0; i < pins.length; i++) {
-        pins[i].classList.remove('hidden');
-      }
+    if (mode === window.util.afterSendModeName) { // если мы уже загружали точки, то сейчас вытаскиваем данные из переменной
+      filterData(backendData);
     } else {
-      window.backend.load(addData, window.util.onBackendError);
+      window.backend.load(filterData, window.util.onBackendError);
     }
   };
 
   var preparePage = function (mode) {
     window.util.setAbleFormElems(noticeForm);
-    window.filter.disableFilters();
+    window.util.setAbleFormElems(filterForm);
     getDefaultPosition();
-    if (mode === window.util.afterSendModeName) { // если у нас уже получены все данные, то прячем карточки и метки
-      var activeCard = map.querySelector('.map__card.popup.active');
-      var pins = map.querySelectorAll('.map__pin');
-      for (var i = 0; i < pins.length; i++) {
-        var elem = pins[i];
-        if (!elem.classList.contains('map__pin--main')) {
-          elem.classList.add('hidden');
-        }
-      }
-      activeCard.classList.remove('active');
-      activeCard.classList.add('hidden');
+    if (mode === window.util.afterSendModeName) { // удаляем с карты отрисованные данные
+      removeElems('.map__pin', 'map__pin--main');
+      removeElems('.map__card.popup');
       mainPin.addEventListener('mousedown', onAnotherClickInactiveMainPin);
     } else {
       mainPin.addEventListener('mousedown', onClickInactiveMainPin);
     }
   };
+
+  var filterData = function (array, filterName, filterValue) {
+    if (!backendData) {
+      backendData = array;
+    }
+    var result = array;
+    if (filterName && filterValue && filterValue !== ANY_OPTION_NAME) {
+      result = result.filter(function (item) {
+        return item.offer[filterGlossary[filterName]] === filterValue;
+      });
+    }
+    result = result.slice(0, MAX_PIN_COUNT);
+    redrawMap(result);
+  };
+
+  filterItems.forEach(function (item) {
+    item.addEventListener('change', function () {
+      filterData(backendData, item.name, item.value);
+    });
+  });
 
   var onClickInactiveMainPin = function (evt) {
     if (evt.button === window.util.mouseLeft) {
