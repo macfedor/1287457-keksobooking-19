@@ -1,11 +1,12 @@
 'use strict';
 
 (function () {
-
+  var AFTER_SEND_MODE_NAME = 'afterSend';
   var MOUSE_LEFT = 0;
   var KEY_ENTER = 'Enter';
   var KEY_ESC = 'Escape';
-
+  var successPopup;
+  var errorPopup;
   var getRandomNumb = function (min, max) {
     return Math.floor(Math.random() * max) + min;
   };
@@ -23,27 +24,74 @@
     elem.classList.add('hidden');
   };
 
-  var createInfo = function (infoText, infoType) {
-    var node = document.createElement('div');
-    var bgColor;
-    var showTime = 5000;
-    node.style = 'z-index: 100; text-align: center; top:50%; position:fixed; left:0; width:100%; fint-size:30px; color:#fff';
-    node.textContent = infoText;
-    switch (infoType) {
-      case 'error':
-        bgColor = 'red';
-        break;
-      case 'success':
-        bgColor = 'green';
-        break;
-      default:
-        bgColor = 'yellow';
+  var createSuccessPopup = function () {
+    successPopup = document.querySelector('#success').content.querySelector('.success');
+    document.querySelector('main').appendChild(successPopup);
+  };
+
+  var createErrorPopup = function () {
+    errorPopup = document.querySelector('#error').content.querySelector('.error');
+    document.querySelector('main').appendChild(errorPopup);
+  };
+
+  var onCloseSuccessPopup = function () {
+    window.util.hideElem(successPopup);
+    document.removeEventListener('click', onCloseSuccessPopup);
+    document.removeEventListener('keydown', onKeydownSuccessPopup);
+  };
+
+  var onKeydownSuccessPopup = function (evtSuccessKeydown) {
+    if (evtSuccessKeydown.key === window.util.keyEscape) {
+      onCloseSuccessPopup();
     }
-    node.style.backgroundColor = bgColor;
-    document.body.insertAdjacentElement('afterbegin', node);
-    setTimeout(function () {
-      node.remove();
-    }, showTime);
+  };
+
+  var onBackendSuccess = function (string) {
+    if (!successPopup) {
+      createSuccessPopup();
+    }
+    successPopup.classList.remove('hidden');
+    var popupText = successPopup.querySelector('.success__message');
+    popupText.textContent = string;
+    document.addEventListener('click', onCloseSuccessPopup);
+    document.addEventListener('keydown', onKeydownSuccessPopup);
+  };
+
+  var onCloseErrorPopup = function () {
+    window.util.hideElem(errorPopup);
+    document.removeEventListener('mouseup', onCloseErrorPopup);
+    document.removeEventListener('keydown', onKeydownErrorPopup);
+  };
+
+  var onKeydownErrorPopup = function (evtErrorKeydown) {
+    if (evtErrorKeydown.key === window.util.keyEscape) {
+      onCloseErrorPopup();
+    }
+  };
+
+  var onBackendError = function (string) {
+    if (!errorPopup) {
+      createErrorPopup();
+    }
+    var errorBtnClose = errorPopup.querySelector('.error__button');
+    var popupText = errorPopup.querySelector('.error__message');
+    popupText.textContent = string;
+    document.addEventListener('mouseup', onCloseErrorPopup);
+    errorBtnClose.addEventListener('mouseup', onCloseErrorPopup);
+    document.addEventListener('keydown', onKeydownErrorPopup);
+    errorPopup.classList.remove('hidden');
+  };
+
+  var setAbleFormElems = function (currentForm, enable) { // переключение disable/endable для полей формы. если есть второй аргумент - поля активны, если нет - отключены
+    var fields = currentForm.querySelectorAll('fieldset');
+    for (var i = 0; i < fields.length; i++) {
+      var elem = fields[i];
+      if (enable) {
+        elem.disabled = false;
+      } else {
+        elem.disabled = true;
+      }
+    }
   };
 
   window.util = {
@@ -53,7 +101,10 @@
     mouseLeft: MOUSE_LEFT,
     keyEnter: KEY_ENTER,
     keyEscape: KEY_ESC,
-    createInfo: createInfo
+    afterSendModeName: AFTER_SEND_MODE_NAME,
+    onBackendError: onBackendError,
+    onBackendSuccess: onBackendSuccess,
+    setAbleFormElems: setAbleFormElems
   };
 
 })();

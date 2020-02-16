@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-
   var noticeForm = document.querySelector('.ad-form');
   var roomNumber = noticeForm.querySelector('#room_number');
   var capacity = noticeForm.querySelector('#capacity');
@@ -9,6 +8,8 @@
   var price = noticeForm.querySelector('#price');
   var timein = noticeForm.querySelector('#timein');
   var timeout = noticeForm.querySelector('#timeout');
+  var btnReset = noticeForm.querySelector('.ad-form__submit');
+  var map = document.querySelector('.map');
   var roomsGuests = {
     '1': ['1'],
     '2': ['1', '2'],
@@ -22,30 +23,17 @@
     'palace': 10000
   };
 
-  var disableFormElems = function () {
-    var fields = noticeForm.querySelectorAll('fieldset');
-    for (var i = 0; i < fields.length; i++) {
-      fields[i].disabled = true;
-    }
-  };
-
-  var enableFormElems = function () {
-    var fields = noticeForm.querySelectorAll('fieldset');
-    for (var i = 0; i < fields.length; i++) {
-      fields[i].disabled = false;
-    }
-  };
-
   var checkRoomsCapacities = function () {
     var activeValue = roomNumber.value;
     var availableGuests = roomsGuests[activeValue];
     var capacityValues = capacity.querySelectorAll('option');
     for (var i = 0; i < capacityValues.length; i++) {
-      if (availableGuests.indexOf(capacityValues[i].value) === -1) {
-        capacityValues[i].removeAttribute('selected');
-        capacityValues[i].disabled = true;
+      var elem = capacityValues[i];
+      if (availableGuests.indexOf(elem.value) === -1) {
+        elem.removeAttribute('selected');
+        elem.disabled = true;
       } else {
-        capacityValues[i].disabled = false;
+        elem.disabled = false;
       }
     }
     var capacityActive = capacity.querySelector('option:checked');
@@ -69,6 +57,28 @@
     timeout.value = activeValue;
   };
 
+  var resetNoticeForm = function () {
+    noticeForm.reset();
+    window.map.getDefaultPosition();
+  };
+
+  var submitSuccess = function (string) {
+    window.util.onBackendSuccess(string);
+    noticeForm.reset();
+    window.util.setAbleFormElems(noticeForm);
+    map.classList.add('map--faded');
+    window.map.preparePage(window.util.afterSendModeName);
+    checkRoomsCapacities();
+    checkTypesPrices();
+    noticeForm.classList.add('ad-form--disabled');
+  };
+
+  var onSubmitNotice = function (evtSubmit) {
+    evtSubmit.preventDefault();
+    var formData = new FormData(noticeForm);
+    window.backend.save(formData, submitSuccess, window.util.onBackendError);
+  };
+
   roomNumber.addEventListener('change', function () {
     checkRoomsCapacities();
   });
@@ -84,11 +94,11 @@
   timein.addEventListener('change', onChangeTimes);
   timeout.addEventListener('change', onChangeTimes);
 
-  window.notice = {
-    enableFormElems: enableFormElems,
-    disableFormElems: disableFormElems,
-    checkRoomsCapacities: checkRoomsCapacities,
-    checkTypesPrices: checkTypesPrices
-  };
+  btnReset.addEventListener('click', resetNoticeForm());
+
+  noticeForm.addEventListener('submit', onSubmitNotice);
+
+  checkRoomsCapacities();
+  checkTypesPrices();
 
 })();
