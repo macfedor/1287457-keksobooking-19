@@ -82,16 +82,15 @@
     errorPopup.classList.remove('hidden');
   };
 
-  var setAbleFormElems = function (currentForm, enable) { // переключение disable/endable для полей формы. если есть второй аргумент - поля активны, если нет - отключены
-    var fields = currentForm.querySelectorAll('fieldset');
-    for (var i = 0; i < fields.length; i++) {
-      var elem = fields[i];
+  var setAbleFormElems = function (currentForm, enable) { // переключение disable/endable для элементов формы. если есть второй аргумент - поля активны, если нет - отключены
+    var fields = currentForm.querySelectorAll('fieldset, select');
+    fields.forEach(function (field) {
       if (enable) {
-        elem.disabled = false;
+        field.disabled = false;
       } else {
-        elem.disabled = true;
+        field.disabled = true;
       }
-    }
+    });
   };
 
   window.util = {
