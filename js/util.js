@@ -35,7 +35,7 @@
   };
 
   var onCloseSuccessPopup = function () {
-    window.util.hideElem(successPopup);
+    hideElem(successPopup);
     document.removeEventListener('click', onCloseSuccessPopup);
     document.removeEventListener('keydown', onKeydownSuccessPopup);
   };
@@ -58,7 +58,7 @@
   };
 
   var onCloseErrorPopup = function () {
-    window.util.hideElem(errorPopup);
+    hideElem(errorPopup);
     document.removeEventListener('mouseup', onCloseErrorPopup);
     document.removeEventListener('keydown', onKeydownErrorPopup);
   };
