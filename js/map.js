@@ -6,6 +6,9 @@
   var MIN_Y = 130;
   var MAX_PIN_COUNT = 5;
   var ANY_OPTION_NAME = 'any';
+  var LOW_PRICE_NAME = 'low';
+  var HIGH_PRICE_NAME = 'high';
+  var PRICE_FILTER_NAME = 'housing-price';
   var mainPin = document.querySelector('.map__pin--main');
   var mainPinImg = mainPin.querySelector('img');
   var mainPinWidth = mainPin.offsetWidth;
@@ -14,12 +17,28 @@
   var noticeForm = document.querySelector('.ad-form');
   var filterForm = document.querySelector('.map__filters');
   var filterItems = filterForm.querySelectorAll('select, input');
-  var filterGlossary = {
-    'housing-type': 'type'
+  var filterNamesMap = {
+    'housing-type': 'type',
+    'housing-price': 'price',
+    'housing-rooms': 'rooms',
+    'housing-guests': 'guests'
+  };
+  var pricesMap = {
+    'low': {
+      'name': 'low',
+      'value': 10000
+    },
+    'middle': {
+      'name': 'middle'
+    },
+    'high': {
+      'name': 'high',
+      'value': 50000
+    }
   };
   var addressInput = noticeForm.querySelector('#address');
   var mapWidth = map.offsetWidth;
-  var backendData;
+  var backendData; // переменная для хранения данных с сервера
 
   var onClickPin = function (evt) {
     var pin = evt.target.closest('button');
@@ -115,24 +134,45 @@
     }
   };
 
-  var filterData = function (array, filterName, filterValue) {
-    if (!backendData) {
+  var filterData = function (array) {
+    if (!backendData) { // записываем полученные от сервера данные в переменную, если она пустая
       backendData = array;
     }
     var result = array;
-    if (filterName && filterValue && filterValue !== ANY_OPTION_NAME) {
-      result = result.filter(function (item) {
-        return item.offer[filterGlossary[filterName]] === filterValue;
-      });
-    }
+    filterItems.forEach(function (item) {
+      if (item.checked) {
+        result = result.filter(function (elem) {
+          return elem.offer.features.indexOf(item.value) !== -1;
+        });
+      } else if (item.value !== ANY_OPTION_NAME && item.type !== 'checkbox') {
+        var value = item.value;
+        result = result.filter(function (elem) {
+          if (item.name === PRICE_FILTER_NAME) {
+            if (pricesMap[value].name === LOW_PRICE_NAME) {
+              return elem.offer[filterNamesMap[item.name]] < pricesMap[value].value;
+            } else if (pricesMap[value].name === HIGH_PRICE_NAME) {
+              return elem.offer[filterNamesMap[item.name]] > pricesMap[value].value;
+            } else {
+              return elem.offer[filterNamesMap[item.name]] >= pricesMap[LOW_PRICE_NAME].value && elem.offer[filterNamesMap[item.name]] <= pricesMap[HIGH_PRICE_NAME].value;
+            }
+          } else {
+            return elem.offer[filterNamesMap[item.name]] == value; // нестрогое сравнение для сопоставления числа гостей/комнат, полученных в виде строки из select с числовыми значениями из ответа сервера. ps: придется городить проверки - eslint Не принимает нестрогие сравнения :(
+          }
+        });
+      }
+    });
     result = result.slice(0, MAX_PIN_COUNT);
     redrawMap(result);
   };
 
   filterItems.forEach(function (item) {
     item.addEventListener('change', function () {
-      filterData(backendData, item.name, item.value);
+      onChangeFilterItem(); // непонятно - почему я не могу сюда сразу вписать window.debounce... ?
     });
+  });
+
+  var onChangeFilterItem = window.debounce(function () {
+    filterData(backendData);
   });
 
   var onClickInactiveMainPin = function (evt) {
