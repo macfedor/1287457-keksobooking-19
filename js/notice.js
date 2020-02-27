@@ -10,13 +10,13 @@
   var timeout = noticeForm.querySelector('#timeout');
   var btnReset = noticeForm.querySelector('.ad-form__submit');
   var map = document.querySelector('.map');
-  var roomsGuests = {
+  var roomsGuestsMap = {
     '1': ['1'],
     '2': ['1', '2'],
     '3': ['1', '2', '3'],
     '100': ['0']
   };
-  var typesPrices = {
+  var typesPricesMap = {
     'bungalo': 0,
     'flat': 1000,
     'house': 5000,
@@ -25,7 +25,7 @@
 
   var checkRoomsCapacities = function () {
     var activeValue = roomNumber.value;
-    var availableGuests = roomsGuests[activeValue];
+    var availableGuests = roomsGuestsMap[activeValue];
     var capacityValues = capacity.querySelectorAll('option');
     for (var i = 0; i < capacityValues.length; i++) {
       var elem = capacityValues[i];
@@ -46,7 +46,7 @@
 
   var checkTypesPrices = function () {
     var activeType = type.value;
-    var minPrice = typesPrices[activeType];
+    var minPrice = typesPricesMap[activeType];
     price.setAttribute('placeholder', minPrice);
     price.setAttribute('min', minPrice);
   };
@@ -78,6 +78,20 @@
     var formData = new FormData(noticeForm);
     window.backend.save(formData, submitSuccess, window.util.onBackendError);
   };
+
+  var avatarUpload = noticeForm.querySelector('#avatar');
+  var avatarPreview = noticeForm.querySelector('.ad-form-header__preview img');
+
+  avatarUpload.addEventListener('change', function () {
+    window.util.insertImage(avatarUpload, avatarPreview);
+  });
+
+  var photoUpload = noticeForm.querySelector('#images');
+  var photoPreview = noticeForm.querySelector('.ad-form__photo');
+
+  photoUpload.addEventListener('change', function () {
+    window.util.insertImage(photoUpload, photoPreview);
+  });
 
   roomNumber.addEventListener('change', function () {
     checkRoomsCapacities();

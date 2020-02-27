@@ -109,6 +109,22 @@
     return firstValue === secondValue;
   };
 
+  var insertImage = function (fileChooser, previewBlock) {
+    var file = fileChooser.files[0];
+    var reader = new FileReader();
+    reader.addEventListener('load', function () {
+      var img = previewBlock;
+      if (previewBlock.tagName !== 'IMG') {
+        if (!previewBlock.querySelector('img')) {
+          previewBlock.insertAdjacentHTML('afterbegin', '<img style="max-width:100%; max-height:100%">');
+        }
+        img = previewBlock.querySelector('img');
+      }
+      img.src = reader.result;
+    });
+    reader.readAsDataURL(file);
+  };
+
   window.util = {
     getRandomNumb: getRandomNumb,
     getRandomArray: getRandomArray,
@@ -120,7 +136,8 @@
     onBackendError: onBackendError,
     onBackendSuccess: onBackendSuccess,
     setAbleFormElems: setAbleFormElems,
-    comparePrimitives: comparePrimitives
+    comparePrimitives: comparePrimitives,
+    insertImage: insertImage
   };
 
 })();
