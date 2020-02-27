@@ -93,6 +93,22 @@
     });
   };
 
+  var comparePrimitives = function (firstValue, secondValue) {
+    if (typeof (firstValue) === typeof (secondValue)) {
+      return firstValue === secondValue;
+    }
+    var type = typeof (firstValue);
+    switch (type) {
+      case 'number':
+        secondValue = Number(secondValue);
+        break;
+      case 'string':
+        secondValue = String(secondValue);
+        break;
+    }
+    return firstValue === secondValue;
+  };
+
   window.util = {
     getRandomNumb: getRandomNumb,
     getRandomArray: getRandomArray,
@@ -103,7 +119,8 @@
     afterSendModeName: AFTER_SEND_MODE_NAME,
     onBackendError: onBackendError,
     onBackendSuccess: onBackendSuccess,
-    setAbleFormElems: setAbleFormElems
+    setAbleFormElems: setAbleFormElems,
+    comparePrimitives: comparePrimitives
   };
 
 })();

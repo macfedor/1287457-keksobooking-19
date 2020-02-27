@@ -134,6 +134,21 @@
     }
   };
 
+  var getPriceRange = function (priceType, offerValue, priceValue) {
+    var result;
+    switch (priceType) {
+      case LOW_PRICE_NAME:
+        result = offerValue < priceValue;
+        break;
+      case HIGH_PRICE_NAME:
+        result = offerValue > priceValue;
+        break;
+      default:
+        result = offerValue >= pricesMap[LOW_PRICE_NAME].value && offerValue <= pricesMap[HIGH_PRICE_NAME].value;
+    }
+    return result;
+  };
+
   var filterData = function (array) {
     if (!backendData) { // записываем полученные от сервера данные в переменную, если она пустая
       backendData = array;
@@ -145,18 +160,14 @@
           return elem.offer.features.indexOf(item.value) !== -1;
         });
       } else if (item.value !== ANY_OPTION_NAME && item.type !== 'checkbox') {
-        var value = item.value;
         result = result.filter(function (elem) {
           if (item.name === PRICE_FILTER_NAME) {
-            if (pricesMap[value].name === LOW_PRICE_NAME) {
-              return elem.offer[filterNamesMap[item.name]] < pricesMap[value].value;
-            } else if (pricesMap[value].name === HIGH_PRICE_NAME) {
-              return elem.offer[filterNamesMap[item.name]] > pricesMap[value].value;
-            } else {
-              return elem.offer[filterNamesMap[item.name]] >= pricesMap[LOW_PRICE_NAME].value && elem.offer[filterNamesMap[item.name]] <= pricesMap[HIGH_PRICE_NAME].value;
-            }
+            var priceType = pricesMap[item.value].name;
+            var offerValue = elem.offer[filterNamesMap[item.name]];
+            var priceValue = pricesMap[item.value].value;
+            return getPriceRange(priceType, offerValue, priceValue);
           } else {
-            return elem.offer[filterNamesMap[item.name]] == value; // нестрогое сравнение для сопоставления числа гостей/комнат, полученных в виде строки из select с числовыми значениями из ответа сервера. ps: придется городить проверки - eslint Не принимает нестрогие сравнения :(
+            return window.util.comparePrimitives(elem.offer[filterNamesMap[item.name]], item.value);
           }
         });
       }
