@@ -7,20 +7,8 @@
   var KEY_ESC = 'Escape';
   var successPopup;
   var errorPopup;
-  var getRandomNumb = function (min, max) {
-    return Math.floor(Math.random() * max) + min;
-  };
 
-  var getRandomArray = function (array) {
-    var resultArray = [];
-    var length = getRandomNumb(1, array.length);
-    for (var i = 0; i < length; i++) {
-      resultArray.push(array[i]);
-    }
-    return resultArray;
-  };
-
-  var hideElem = function (elem) {
+  var hideElement = function (elem) {
     elem.classList.add('hidden');
   };
 
@@ -34,15 +22,15 @@
     document.querySelector('main').appendChild(errorPopup);
   };
 
-  var onCloseSuccessPopup = function () {
-    hideElem(successPopup);
-    document.removeEventListener('click', onCloseSuccessPopup);
-    document.removeEventListener('keydown', onKeydownSuccessPopup);
+  var onSuccessPopupClose = function () {
+    hideElement(successPopup);
+    document.removeEventListener('click', onSuccessPopupClose);
+    document.removeEventListener('keydown', onSuccessPopupKeydown);
   };
 
-  var onKeydownSuccessPopup = function (evtSuccessKeydown) {
+  var onSuccessPopupKeydown = function (evtSuccessKeydown) {
     if (evtSuccessKeydown.key === window.util.keyEscape) {
-      onCloseSuccessPopup();
+      onSuccessPopupClose();
     }
   };
 
@@ -53,19 +41,19 @@
     successPopup.classList.remove('hidden');
     var popupText = successPopup.querySelector('.success__message');
     popupText.textContent = string;
-    document.addEventListener('click', onCloseSuccessPopup);
-    document.addEventListener('keydown', onKeydownSuccessPopup);
+    document.addEventListener('click', onSuccessPopupClose);
+    document.addEventListener('keydown', onSuccessPopupKeydown);
   };
 
-  var onCloseErrorPopup = function () {
-    hideElem(errorPopup);
-    document.removeEventListener('mouseup', onCloseErrorPopup);
-    document.removeEventListener('keydown', onKeydownErrorPopup);
+  var onErrorPopupClose = function () {
+    hideElement(errorPopup);
+    document.removeEventListener('mouseup', onErrorPopupClose);
+    document.removeEventListener('keydown', onErrorPopupKeydown);
   };
 
-  var onKeydownErrorPopup = function (evtErrorKeydown) {
+  var onErrorPopupKeydown = function (evtErrorKeydown) {
     if (evtErrorKeydown.key === window.util.keyEscape) {
-      onCloseErrorPopup();
+      onErrorPopupClose();
     }
   };
 
@@ -76,20 +64,16 @@
     var errorBtnClose = errorPopup.querySelector('.error__button');
     var popupText = errorPopup.querySelector('.error__message');
     popupText.textContent = string;
-    document.addEventListener('mouseup', onCloseErrorPopup);
-    errorBtnClose.addEventListener('mouseup', onCloseErrorPopup);
-    document.addEventListener('keydown', onKeydownErrorPopup);
+    document.addEventListener('mouseup', onErrorPopupClose);
+    errorBtnClose.addEventListener('mouseup', onErrorPopupClose);
+    document.addEventListener('keydown', onErrorPopupKeydown);
     errorPopup.classList.remove('hidden');
   };
 
   var setAbleFormElems = function (currentForm, enable) { // переключение disable/endable для элементов формы. если есть второй аргумент - поля активны, если нет - отключены
     var fields = currentForm.querySelectorAll('fieldset, select');
     fields.forEach(function (field) {
-      if (enable) {
-        field.disabled = false;
-      } else {
-        field.disabled = true;
-      }
+      field.disabled = enable ? false : true;
     });
   };
 
@@ -126,9 +110,7 @@
   };
 
   window.util = {
-    getRandomNumb: getRandomNumb,
-    getRandomArray: getRandomArray,
-    hideElem: hideElem,
+    hideElement: hideElement,
     mouseLeft: MOUSE_LEFT,
     keyEnter: KEY_ENTER,
     keyEscape: KEY_ESC,

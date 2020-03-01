@@ -15,7 +15,7 @@
     if (property) {
       callback(parentBlock, property, selector, contentAddition, customContent);
     } else {
-      window.util.hideElem(parentBlock.querySelector(selector));
+      window.util.hideElement(parentBlock.querySelector(selector));
     }
   };
 
@@ -56,13 +56,13 @@
     if (card.offer.rooms && card.offer.guests) {
       result.querySelector('.popup__text--capacity').textContent = card.offer.rooms + ' комнаты для ' + card.offer.guests + ' гостей';
     } else {
-      window.util.hideElem(result.querySelector('.popup__text--capacity'));
+      window.util.hideElement(result.querySelector('.popup__text--capacity'));
     }
 
     if (card.offer.checkin && card.offer.checkout) {
       result.querySelector('.popup__text--time').textContent = 'Заезд после ' + card.offer.checkin + ', выезд до ' + card.offer.checkout;
     } else {
-      window.util.hideElem(result.querySelector('.popup__text--time'));
+      window.util.hideElement(result.querySelector('.popup__text--time'));
     }
 
     var onClose = function () {
@@ -75,26 +75,30 @@
     return result;
   };
 
+  var closeActiveCard = function () {
+    var activeCard = document.querySelector('.map__card:not(.hidden)');
+    if (activeCard) {
+      activeCard.classList.add('hidden');
+    }
+  };
+
   var onDocumentEscPress = function (evt) {
     if (evt.key === window.util.keyEscape) {
-      var activeCard = document.querySelector('.map__card.active');
-      activeCard.classList.remove('active');
-      activeCard.classList.add('hidden');
+      closeActiveCard();
       document.removeEventListener('keydown', onDocumentEscPress);
     }
   };
 
   var showCard = function (title) {
     var popups = document.querySelectorAll('.map__card');
-    popups.forEach(function (elem) {
+    closeActiveCard();
+    for (var i = 0; i < popups.length; i++) {
+      var elem = popups[i];
       if (elem.querySelector('.popup__title').textContent === title) {
         elem.classList.remove('hidden');
-        elem.classList.add('active');
-      } else {
-        elem.classList.add('hidden');
-        elem.classList.remove('active');
+        break;
       }
-    });
+    }
     document.addEventListener('keydown', onDocumentEscPress);
   };
 

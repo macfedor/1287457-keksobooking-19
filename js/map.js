@@ -45,13 +45,13 @@
   var mapWidth = map.offsetWidth;
   var backendData; // переменная для хранения данных с сервера
 
-  var onClickPin = function (evt) {
+  var onPinClick = function (evt) {
     var pin = evt.target.closest('button');
     var img = pin.querySelector('img');
-    var pins = map.querySelectorAll('.map__pin');
-    pins.forEach(function (elem) {
-      elem.classList.remove('map__pin--active');
-    });
+    var activePin = map.querySelector('.map__pin--active');
+    if (activePin) {
+      activePin.classList.remove('map__pin--active');
+    }
     pin.classList.add('map__pin--active');
     window.card.showCard(img.alt);
   };
@@ -62,16 +62,16 @@
     avatar.setAttribute('alt', pin.offer.title);
     avatar.setAttribute('src', pin.author.avatar);
     result.setAttribute('style', 'left: ' + pin.location.x + 'px; top: ' + pin.location.y + 'px;transform:translate(-50%, -100%)');
-    result.addEventListener('mousedown', onClickPin);
+    result.addEventListener('mousedown', onPinClick);
     result.addEventListener('keydown', function (evt) {
       if (evt.key === window.util.keyEnter) {
-        onClickPin(evt);
+        onPinClick(evt);
       }
     });
     return result;
   };
 
-  var removeElems = function (selector, unlessClassName) { // удаляем все элементы по селектору. кроме элементов с классом в unlessClassName
+  var removeElements = function (selector, unlessClassName) { // удаляем все элементы по селектору. кроме элементов с классом в unlessClassName
     var elems = map.querySelectorAll(selector);
     elems.forEach(function (elem) {
       if (!elem.classList.contains(unlessClassName)) {
@@ -98,7 +98,7 @@
   };
 
   var redrawMap = function (data) {
-    removeElems('.map__pin, .map__card.popup', 'map__pin--main');
+    removeElements('.map__pin, .map__card.popup', 'map__pin--main');
     addData(data);
   };
 
@@ -120,8 +120,8 @@
     noticeForm.classList.remove('ad-form--disabled');
     getEnabledPinCoords();
 
-    mainPin.removeEventListener('mousedown', onClickInactiveMainPin);
-    mainPin.addEventListener('mousedown', onClickActiveMainPin);
+    mainPin.removeEventListener('mousedown', onInactiveMainPinClick);
+    mainPin.addEventListener('mousedown', onActiveMainPinClick);
     if (mode === window.util.afterSendModeName) { // если мы уже загружали точки, то сейчас вытаскиваем данные из переменной
       filterData(backendData);
     } else {
@@ -134,11 +134,11 @@
     window.util.setAbleFormElems(filterForm);
     setDefaultPosition();
     if (mode === window.util.afterSendModeName) { // удаляем с карты отрисованные данные
-      removeElems('.map__pin', 'map__pin--main');
-      removeElems('.map__card.popup');
-      mainPin.addEventListener('mousedown', onAnotherClickInactiveMainPin);
+      removeElements('.map__pin', 'map__pin--main');
+      removeElements('.map__card.popup');
+      mainPin.addEventListener('mousedown', onInactiveMainPinNewClick);
     } else {
-      mainPin.addEventListener('mousedown', onClickInactiveMainPin);
+      mainPin.addEventListener('mousedown', onInactiveMainPinClick);
     }
   };
 
@@ -186,7 +186,7 @@
 
   filterItems.forEach(function (item) {
     item.addEventListener('change', function () {
-      onChangeFilterItem();
+      onFilterItemChange();
     });
   });
 
@@ -195,30 +195,30 @@
     item.addEventListener('keydown', function (evt) {
       if (evt.key === window.util.keyEnter) {
         item.toggleAttribute('checked');
-        onChangeFilterItem();
+        onFilterItemChange();
       }
     });
   });
 
-  var onChangeFilterItem = window.debounce(function () {
+  var onFilterItemChange = window.debounce(function () {
     filterData(backendData);
   });
 
-  var onClickInactiveMainPin = function (evt) {
+  var onInactiveMainPinClick = function (evt) {
     if (evt.button === window.util.mouseLeft) {
       activatePage();
-      mainPin.removeEventListener('mousedown', onClickInactiveMainPin);
+      mainPin.removeEventListener('mousedown', onInactiveMainPinClick);
     }
   };
 
-  var onAnotherClickInactiveMainPin = function (evt) {
+  var onInactiveMainPinNewClick = function (evt) {
     if (evt.button === window.util.mouseLeft) {
       activatePage(window.util.afterSendModeName);
-      mainPin.removeEventListener('mousedown', onAnotherClickInactiveMainPin);
+      mainPin.removeEventListener('mousedown', onInactiveMainPinNewClick);
     }
   };
 
-  var onClickActiveMainPin = function (evt) {
+  var onActiveMainPinClick = function (evt) {
     var currentCoords = {
       x: evt.clientX,
       y: evt.clientY
@@ -269,7 +269,6 @@
   preparePage();
 
   window.map = {
-    activatePage: activatePage,
     preparePage: preparePage,
     setDefaultPosition: setDefaultPosition
   };

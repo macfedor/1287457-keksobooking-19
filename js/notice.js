@@ -28,21 +28,17 @@
     var activeValue = roomNumber.value;
     var availableGuests = roomsGuestsMap[activeValue];
     var capacityValues = capacity.querySelectorAll('option');
-    for (var i = 0; i < capacityValues.length; i++) {
-      var elem = capacityValues[i];
+    capacityValues.forEach(function (elem) {
       if (availableGuests.indexOf(elem.value) === -1) {
         elem.removeAttribute('selected');
         elem.disabled = true;
       } else {
         elem.disabled = false;
       }
-    }
+    });
     var capacityActive = capacity.querySelector('option:checked');
-    if (capacityActive.disabled === true) {
-      capacity.setCustomValidity('Выберите из доступных вариантов для выбранного количества комнат');
-    } else {
-      capacity.setCustomValidity('');
-    }
+    var customValidity = capacityActive.disabled === true ? 'Выберите из доступных вариантов для выбранного количества комнат' : '';
+    capacity.setCustomValidity(customValidity);
   };
 
   var checkTypesPrices = function () {
@@ -52,7 +48,7 @@
     price.setAttribute('min', minPrice);
   };
 
-  var onChangeTimes = function (evt) {
+  var onTimesChange = function (evt) {
     var activeValue = evt.target.value;
     timein.value = activeValue;
     timeout.value = activeValue;
@@ -76,7 +72,7 @@
     resetPage();
   };
 
-  var onSubmitNotice = function (evtSubmit) {
+  var onNoticeSubmit = function (evtSubmit) {
     evtSubmit.preventDefault();
     var formData = new FormData(noticeForm);
     window.backend.save(formData, submitSuccess, window.util.onBackendError);
@@ -118,12 +114,12 @@
     checkTypesPrices();
   });
 
-  timein.addEventListener('change', onChangeTimes);
-  timeout.addEventListener('change', onChangeTimes);
+  timein.addEventListener('change', onTimesChange);
+  timeout.addEventListener('change', onTimesChange);
 
   btnReset.addEventListener('click', resetPage);
 
-  noticeForm.addEventListener('submit', onSubmitNotice);
+  noticeForm.addEventListener('submit', onNoticeSubmit);
 
   checkRoomsCapacities();
   checkTypesPrices();
