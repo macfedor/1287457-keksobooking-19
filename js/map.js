@@ -13,10 +13,15 @@
   var mainPinImg = mainPin.querySelector('img');
   var mainPinWidth = mainPin.offsetWidth;
   var mainPinHeight = mainPinImg.offsetHeight + Number(getComputedStyle(mainPin, 'after').height.replace('px', ''));
+  var mainPinDefaultCoordX = Math.floor(mainPin.offsetLeft - mainPin.offsetWidth / 2);
+  var mainPinDefaultCoordY = Math.floor(mainPin.offsetTop - mainPin.offsetHeight / 2);
+  var mainPinDefaultPositionX = mainPin.offsetLeft;
+  var mainPinDefaultPositionY = mainPin.offsetTop;
   var map = document.querySelector('.map');
   var noticeForm = document.querySelector('.ad-form');
   var filterForm = document.querySelector('.map__filters');
   var filterItems = filterForm.querySelectorAll('select, input');
+
   var filterNamesMap = {
     'housing-type': 'type',
     'housing-price': 'price',
@@ -43,17 +48,20 @@
   var onClickPin = function (evt) {
     var pin = evt.target.closest('button');
     var img = pin.querySelector('img');
+    var pins = map.querySelectorAll('.map__pin');
+    pins.forEach(function (elem) {
+      elem.classList.remove('map__pin--active');
+    });
+    pin.classList.add('map__pin--active');
     window.card.showCard(img.alt);
   };
 
   var addPin = function (pin, template) {
     var result = template.cloneNode(true);
-    var coordX = pin.location.x - result.offsetWidth / 2;
-    var coordY = pin.location.y - result.offsetHeight;
     var avatar = result.querySelector('img');
     avatar.setAttribute('alt', pin.offer.title);
     avatar.setAttribute('src', pin.author.avatar);
-    result.setAttribute('style', 'left: ' + coordX + 'px; top: ' + coordY + 'px;');
+    result.setAttribute('style', 'left: ' + pin.location.x + 'px; top: ' + pin.location.y + 'px;transform:translate(-50%, -100%)');
     result.addEventListener('mousedown', onClickPin);
     result.addEventListener('keydown', function (evt) {
       if (evt.key === window.util.keyEnter) {
@@ -100,10 +108,10 @@
     addressInput.value = coordX + ', ' + coordY;
   };
 
-  var getDefaultPosition = function () {
-    var coordX = Math.floor(mainPin.offsetLeft - mainPin.offsetWidth / 2);
-    var coordY = Math.floor(mainPin.offsetTop - mainPin.offsetHeight / 2);
-    addressInput.value = coordX + ', ' + coordY;
+  var setDefaultPosition = function () {
+    addressInput.value = mainPinDefaultCoordX + ', ' + mainPinDefaultCoordY;
+    mainPin.style.left = mainPinDefaultPositionX + 'px';
+    mainPin.style.top = mainPinDefaultPositionY + 'px';
   };
 
   var activatePage = function (mode) {
@@ -124,7 +132,7 @@
   var preparePage = function (mode) {
     window.util.setAbleFormElems(noticeForm);
     window.util.setAbleFormElems(filterForm);
-    getDefaultPosition();
+    setDefaultPosition();
     if (mode === window.util.afterSendModeName) { // удаляем с карты отрисованные данные
       removeElems('.map__pin', 'map__pin--main');
       removeElems('.map__card.popup');
@@ -178,7 +186,17 @@
 
   filterItems.forEach(function (item) {
     item.addEventListener('change', function () {
-      onChangeFilterItem(); // непонятно - почему я не могу сюда сразу вписать window.debounce... ?
+      onChangeFilterItem();
+    });
+  });
+
+  var filterCheckboxes = filterForm.querySelectorAll('input[type=checkbox]');
+  filterCheckboxes.forEach(function (item) {
+    item.addEventListener('keydown', function (evt) {
+      if (evt.key === window.util.keyEnter) {
+        item.toggleAttribute('checked');
+        onChangeFilterItem();
+      }
     });
   });
 
@@ -253,7 +271,7 @@
   window.map = {
     activatePage: activatePage,
     preparePage: preparePage,
-    getDefaultPosition: getDefaultPosition
+    setDefaultPosition: setDefaultPosition
   };
 
 })();

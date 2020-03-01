@@ -8,8 +8,9 @@
   var price = noticeForm.querySelector('#price');
   var timein = noticeForm.querySelector('#timein');
   var timeout = noticeForm.querySelector('#timeout');
-  var btnReset = noticeForm.querySelector('.ad-form__submit');
+  var btnReset = noticeForm.querySelector('.ad-form__reset');
   var map = document.querySelector('.map');
+  var filterForm = document.querySelector('.map__filters');
   var roomsGuestsMap = {
     '1': ['1'],
     '2': ['1', '2'],
@@ -57,20 +58,22 @@
     timeout.value = activeValue;
   };
 
-  var resetNoticeForm = function () {
+  var resetPage = function () {
     noticeForm.reset();
-    window.map.getDefaultPosition();
-  };
-
-  var submitSuccess = function (string) {
-    window.util.onBackendSuccess(string);
-    noticeForm.reset();
+    filterForm.reset();
     window.util.setAbleFormElems(noticeForm);
     map.classList.add('map--faded');
     window.map.preparePage(window.util.afterSendModeName);
     checkRoomsCapacities();
     checkTypesPrices();
     noticeForm.classList.add('ad-form--disabled');
+    document.removeEventListener('keydown', window.card.onDocumentEscPress);
+    window.map.setDefaultPosition();
+  };
+
+  var submitSuccess = function (string) {
+    window.util.onBackendSuccess(string);
+    resetPage();
   };
 
   var onSubmitNotice = function (evtSubmit) {
@@ -93,6 +96,16 @@
     window.util.insertImage(photoUpload, photoPreview);
   });
 
+  var noticeCheckboxes = noticeForm.querySelectorAll('input[type=checkbox]');
+  noticeCheckboxes.forEach(function (item) {
+    item.addEventListener('keydown', function (evt) {
+      if (evt.key === window.util.keyEnter) {
+        evt.preventDefault();
+        item.toggleAttribute('checked');
+      }
+    });
+  });
+
   roomNumber.addEventListener('change', function () {
     checkRoomsCapacities();
   });
@@ -108,7 +121,7 @@
   timein.addEventListener('change', onChangeTimes);
   timeout.addEventListener('change', onChangeTimes);
 
-  btnReset.addEventListener('click', resetNoticeForm());
+  btnReset.addEventListener('click', resetPage);
 
   noticeForm.addEventListener('submit', onSubmitNotice);
 

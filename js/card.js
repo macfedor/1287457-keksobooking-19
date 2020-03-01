@@ -86,8 +86,7 @@
 
   var showCard = function (title) {
     var popups = document.querySelectorAll('.map__card');
-    for (var i = 0; i < popups.length; i++) {
-      var elem = popups[i];
+    popups.forEach(function (elem) {
       if (elem.querySelector('.popup__title').textContent === title) {
         elem.classList.remove('hidden');
         elem.classList.add('active');
@@ -95,13 +94,14 @@
         elem.classList.add('hidden');
         elem.classList.remove('active');
       }
-    }
+    });
     document.addEventListener('keydown', onDocumentEscPress);
   };
 
   window.card = {
     addCard: addCard,
-    showCard: showCard
+    showCard: showCard,
+    onDocumentEscPress: onDocumentEscPress
   };
 
 })();
