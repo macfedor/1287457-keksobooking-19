@@ -73,7 +73,7 @@
   var setAbleFormElems = function (currentForm, enable) { // переключение disable/endable для элементов формы. если есть второй аргумент - поля активны, если нет - отключены
     var fields = currentForm.querySelectorAll('fieldset, select');
     fields.forEach(function (field) {
-      field.disabled = enable ? false : true;
+      field.disabled = !enable;
     });
   };
 

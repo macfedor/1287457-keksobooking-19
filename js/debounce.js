@@ -4,7 +4,7 @@
 
   var DEBOUNCE_TIME = 500;
 
-  var debounce = function (callback) {
+  window.debounce = function (callback) {
     var lastTimeout = null;
     return function () {
       var parameters = arguments;
@@ -16,7 +16,5 @@
       }, DEBOUNCE_TIME);
     };
   };
-
-  window.debounce = debounce;
 
 })();

@@ -5,25 +5,29 @@
   var STATUS_SUCCESS = 200;
   var TIMEOUT = 10000;
 
-  var load = function (onSuccess, onError) {
-    var URL = 'https://js.dump.academy/keksobooking/data';
+  var createXhr = function (onError) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
+    xhr.timeout = TIMEOUT;
+    xhr.addEventListener('error', function () {
+      onError('Произошла ошибка соединения');
+    });
+    xhr.addEventListener('timeout', function () {
+      onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс.');
+    });
+    return xhr;
+  };
+
+  var load = function (onSuccess, onError) {
+    var URL = 'https://js.dump.academy/keksobooking/data';
+    var xhr = createXhr(onError);
     xhr.addEventListener('load', function () {
       if (xhr.status === STATUS_SUCCESS) {
         onSuccess(xhr.response);
       } else {
-        onError('Данные не получены. Статус: ' + xhr.status + ' "' + xhr.statusText + '"', 'error');
+        onError('Данные не получены. Статус: ' + xhr.status + ' "' + xhr.statusText + '"');
       }
     });
-    xhr.addEventListener('error', function () {
-      onError('Произошла ошибка соединения', 'error');
-    });
-    xhr.addEventListener('timeout', function () {
-      onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс.', 'error');
-    });
-
-    xhr.timeout = TIMEOUT;
 
     xhr.open('GET', URL);
     xhr.send();
@@ -31,8 +35,7 @@
 
   var save = function (data, onSuccess, onError) {
     var URL_SAVE = 'https://js.dump.academy/keksobooking';
-    var xhrSave = new XMLHttpRequest();
-    xhrSave.responseType = 'json';
+    var xhrSave = createXhr(onError);
 
     xhrSave.addEventListener('load', function () {
       if (xhrSave.status === STATUS_SUCCESS) {
@@ -40,12 +43,6 @@
       } else {
         onError('Статус ответа: ' + xhrSave.status + ' ' + xhrSave.statusText);
       }
-    });
-    xhrSave.addEventListener('error', function () {
-      onError('Произошла ошибка соединения');
-    });
-    xhrSave.addEventListener('timeout', function () {
-      onError('Запрос не успел выполниться за ' + xhrSave.timeout + 'мс');
     });
 
     xhrSave.open('POST', URL_SAVE);
